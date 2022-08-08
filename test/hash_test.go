@@ -99,5 +99,24 @@ func TestHash5(*testing.T) {
 	hashtable.Foreach(func(item *hashgo.HashItem[int, any]) {
 		fmt.Println(item)
 	})
+}
+
+func TestHas6(*testing.T) {
+	hashtable := hashgo.NewHashSet2[int]()
+	//user1 := &User{Id: 1, Name: "xiaoming"}
+	//user2 := User{Id: 1, Name: "xiaoming2"}
+	//hashtable := hashgo.NewHashSet[int]()
+	hashtable.Set(1)
+	hashtable.Set(2)
+
+	fmt.Println(hashtable.GetLoadFactor())
+
+	hashtable.Foreach(func(item *hashgo.HashItem[int, any]) {
+		item.SetKey(10000)
+	})
+
+	hashtable.Foreach(func(item *hashgo.HashItem[int, any]) {
+		fmt.Println(item)
+	})
 
 }

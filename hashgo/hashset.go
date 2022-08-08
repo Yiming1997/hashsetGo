@@ -3,10 +3,25 @@ package hashgo
 import (
 	"errors"
 	"myapp/utils"
+	"sync"
 )
 
+type Option[T comparable] func(*Hashset[T])
+
 type Hashset[T comparable] struct {
-	data [][]*HashItem[T, any]
+	sync.RWMutex
+	data       [][]*HashItem[T, any]
+	loadFactor float64
+}
+
+func (ht *Hashset[T]) GetLoadFactor() float64 {
+	return ht.loadFactor
+}
+
+func WithLoadFactor[T comparable](loadFactor float64) Option[T] {
+	return func(h *Hashset[T]) {
+		h.loadFactor = loadFactor
+	}
 }
 
 func (ht *Hashset[T]) GetData() [][]*HashItem[T, any] {
@@ -17,6 +32,18 @@ func NewHashSet[T comparable]() *Hashset[T] {
 	hashTable := &Hashset[T]{}
 	hashTable.data = make([][]*HashItem[T, any], 16)
 	return hashTable
+}
+
+func NewHashSet2[T comparable](options ...func(hashset *Hashset[T])) *Hashset[T] {
+	hashset := Hashset[T]{
+		data:       make([][]*HashItem[T, any], 16),
+		loadFactor: 0.75,
+	}
+	for _, option := range options {
+		option(&hashset)
+	}
+
+	return &hashset
 }
 
 func (ht *Hashset[T]) Set(key T) (err error) {
