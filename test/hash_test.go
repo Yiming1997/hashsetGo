@@ -27,30 +27,64 @@ func TestHash3(*testing.T) {
 
 	hashtable.Set(1)
 	hashtable.Set(2)
-	hashtable.Set(53)
-	hashtable.Set(63)
-	hashtable.Set(73)
-	hashtable.Set(83)
-	hashtable.Set(100)
-	hashtable.Set(101)
-	hashtable.Set(155)
-	hashtable.Set(178)
-	hashtable.Set(200)
-	hashtable.Set(203)
 
-	hashtable.Set(355)
-	hashtable.Set(478)
+	hashtable.Set(3)
+	hashtable.Set(4)
+
+	hashtable.Set(5)
+	hashtable.Set(6)
+
+	hashtable.Set(7)
+	hashtable.Set(8)
+
+	hashtable.Set(9)
+	hashtable.Set(10)
+
+	hashtable.Set(11)
+	hashtable.Set(12)
+
+	hashtable.Set(13)
+	hashtable.Set(14)
+
+	hashtable.Set(15)
+	hashtable.Set(16)
+
+	hashtable.Set(17)
+	hashtable.Set(18)
+
+	hashtable.Set(19)
+	hashtable.Set(20)
+
 	//hashtable.Set(500)
 	//hashtable.Set(600)
 
 	fmt.Println("hashtable...", hashtable.GetData())
 	fmt.Println("hashtable count", hashtable.Count())
+	fmt.Println("bucket len", len(hashtable.GetData()))
 
-	fmt.Println("after delAll........")
-	hashtable.DelAll()
+	hashtable.Del(1)
+	hashtable.Del(2)
+	hashtable.Del(3)
+	hashtable.Del(4)
+	hashtable.Del(5)
+	hashtable.Del(6)
+	hashtable.Del(7)
+	hashtable.Del(8)
+	hashtable.Del(9)
+	hashtable.Del(10)
+	hashtable.Del(11)
+	hashtable.Del(12)
+	hashtable.Del(13)
+	hashtable.Del(14)
+	hashtable.Del(15)
+	hashtable.Del(16)
+	hashtable.Del(17)
+	hashtable.Del(18)
+	fmt.Println("after deleted...............................................................................")
 
 	fmt.Println("hashtable...", hashtable.GetData())
 	fmt.Println("hashtable count", hashtable.Count())
+	fmt.Println("bucket len", len(hashtable.GetData()))
 
 	//
 	//fmt.Println(user1)
@@ -102,7 +136,7 @@ func TestHash5(*testing.T) {
 }
 
 func TestHas6(*testing.T) {
-	hashtable := hashgo.NewHashSet2[int]()
+	hashtable := hashgo.NewHashSet[int]()
 	//user1 := &User{Id: 1, Name: "xiaoming"}
 	//user2 := User{Id: 1, Name: "xiaoming2"}
 	//hashtable := hashgo.NewHashSet[int]()
@@ -118,5 +152,13 @@ func TestHas6(*testing.T) {
 	hashtable.Foreach(func(item *hashgo.HashItem[int, any]) {
 		fmt.Println(item)
 	})
+}
+
+func TestHas7(*testing.T) {
+	data := make([]any, 16)
+
+	data[1] = make([]int, 16)
+
+	data[2] = "v"
 
 }

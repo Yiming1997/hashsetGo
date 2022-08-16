@@ -2,6 +2,7 @@ package hashgo
 
 import (
 	"errors"
+	"myapp/constVal"
 	"myapp/utils"
 	"sync"
 )
@@ -28,13 +29,7 @@ func (ht *Hashset[T]) GetData() [][]*HashItem[T, any] {
 	return ht.data
 }
 
-func NewHashSet[T comparable]() *Hashset[T] {
-	hashTable := &Hashset[T]{}
-	hashTable.data = make([][]*HashItem[T, any], 16)
-	return hashTable
-}
-
-func NewHashSet2[T comparable](options ...func(hashset *Hashset[T])) *Hashset[T] {
+func NewHashSet[T comparable](options ...func(hashset *Hashset[T])) *Hashset[T] {
 	hashset := Hashset[T]{
 		data:       make([][]*HashItem[T, any], 16),
 		loadFactor: 0.75,
@@ -52,8 +47,8 @@ func (ht *Hashset[T]) Set(key T) (err error) {
 		return err
 	}
 
-	newKeyHashcode := utils.Hashcode(newKey2Bytes) // get hashcode
-	newKeyOffset := utils.Hash(newKeyHashcode, 16) //get target index to store
+	newKeyHashcode := utils.Hashcode(newKey2Bytes)                // get hashcode
+	newKeyOffset := utils.Hash(newKeyHashcode, len(ht.GetData())) //get target index to store
 
 	keyExistence, existItemIndex, err := ht.checkKeyExistence(newKeyOffset, key)
 
@@ -67,6 +62,13 @@ func (ht *Hashset[T]) Set(key T) (err error) {
 	} else {
 		ht.data[newKeyOffset][existItemIndex] = newHashItem //replace the old key with the new
 	}
+
+	currenLoadFactor := float64(ht.Count() / len(ht.data))
+
+	if currenLoadFactor > 0.75 {
+		ht.rehash(constVal.Extend)
+	}
+
 	return nil
 }
 
@@ -78,7 +80,7 @@ func (ht *Hashset[T]) Del(key T) (err error) {
 	}
 
 	targetKeyHashcode := utils.Hashcode(Key2Bytes)
-	targetKeyOffset := targetKeyHashcode % 16
+	targetKeyOffset := targetKeyHashcode % len(ht.GetData())
 
 	targetKeyArr := ht.data[targetKeyOffset]
 	//targetKerArr2 := &ht.data[targetKeyOffset]
@@ -94,6 +96,13 @@ func (ht *Hashset[T]) Del(key T) (err error) {
 			break
 		}
 	}
+
+	currenLoadFactor := float64(ht.Count() / len(ht.data))
+
+	if currenLoadFactor < 0.1 {
+		ht.rehash(constVal.Shrink)
+	}
+
 	return nil
 }
 
@@ -103,8 +112,8 @@ func (ht *Hashset[T]) DelAll() {
 
 func (ht *Hashset[T]) Contains(Key T) bool {
 	newKey2Bytes, _ := utils.Encode(Key)
-	newKeyHashcode := utils.Hashcode(newKey2Bytes) // get hashcode
-	newKeyOffset := utils.Hash(newKeyHashcode, 16) //get target index to store
+	newKeyHashcode := utils.Hashcode(newKey2Bytes)           // get hashcode
+	newKeyOffset := utils.Hash(newKeyHashcode, len(ht.data)) //get target index to store
 	isExist, _, _ := ht.checkKeyExistence(newKeyOffset, Key)
 	return isExist
 }
@@ -152,5 +161,24 @@ func (ht *Hashset[T]) checkKeyExistence(row int, key T) (bool, int, error) {
 
 func (ht *Hashset[T]) sliceItemDeleteByIndex(targetArr []*HashItem[T, any], index, targetKeyOffset int) {
 	ht.data[targetKeyOffset] = append(targetArr[:index], targetArr[(index+1):]...)
+	return
+}
+
+// opCode 1 extend ,2 shrink
+func (ht *Hashset[T]) rehash(opCode constVal.OpCode) {
+	oldSetArr := ht.GetData()
+	if opCode == constVal.Extend { // too many elements may affect the set performance , so extend  its capability
+		ht.data = make([][]*HashItem[T, any], len(ht.data)*2)
+	} else if opCode == constVal.Shrink && len(ht.data) > 16 { // too fewer elements, shrink
+		ht.data = make([][]*HashItem[T, any], len(ht.data)/2)
+	} else {
+		return
+	}
+
+	for _, arrItem := range oldSetArr {
+		for _, item := range arrItem {
+			ht.Set(item.GetKey())
+		}
+	}
 	return
 }
